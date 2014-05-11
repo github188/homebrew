@@ -1532,6 +1532,18 @@ def renameHtmInPage(fname, order=1):
                 os.rename(name_e, name_n)
 
 
+def renamePic(prefix):
+    lst = glob.glob('*');
+    lst.sort()
+
+    c = 1
+    for l in lst:
+        name = '%s%03d.jpg' % (prefix, c)
+        c += 1
+        print l, '-->', name
+        os.rename(l, name)
+
+
 ############################################################
 
 if __name__ == "__main__":
