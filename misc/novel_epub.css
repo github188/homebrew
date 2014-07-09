@@ -1,0 +1,73 @@
+﻿
+body {
+	padding: 0%;
+	margin-top: 0%;
+	margin-bottom: 0%;
+	margin-left: 0%;
+	margin-right: 0%;
+	line-height:150%;
+	text-align: justify;
+	font-family:"宋体";
+}
+p {
+	text-align: justify;
+	text-indent: 2em;
+	margin-top: 0pt;
+	margin-bottom: 0pt;
+}
+.cover {
+	width:100%;
+	padding:0px;
+}
+.center {
+	text-align: center;
+	margin-left: 0%;
+	margin-right: 0%;
+}
+.left {
+	text-align: left;
+	margin-left: 0%;
+	margin-right: 0%;
+}
+.right {
+	text-align: right;
+	margin-left: 0%;
+	margin-right: 0%;
+}
+.quote {
+	margin-top: 0%;
+	margin-bottom: 0%;
+	margin-left: 1em;
+	margin-right: 1em;
+	text-align: justify;
+}
+h1 {
+	text-align: center;
+	font-weight:bold;
+	font-size:xx-large;
+}
+h2 {
+	text-align: center;
+	font-weight:bold;
+	font-size:x-large;
+}
+h3 {
+	text-align: center;
+	font-weight:bold;
+	font-size:large;
+}
+h4 {
+	text-align: center;
+	font-weight:bold;
+	font-size:medium;
+}
+h5 {
+	text-align: center;
+	font-weight:bold;
+	font-size:small;
+}
+h6 {
+	text-align: center;
+	font-weight:bold;
+	font-size:x-small;
+}
