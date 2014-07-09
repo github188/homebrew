@@ -1544,6 +1544,22 @@ def renamePic(prefix):
         os.rename(l, name)
 
 
+def replace_text(fname, oldstr, newstr):
+    f = open(fname, 'r')
+    lines = f.readlines()
+    f.close()
+
+    f = open(fname, 'w')
+    for line in lines:
+        line = string.replace(line, oldstr, newstr)
+        f.write(line)
+    f.close()
+
+def multi_replace_text(oldstr, newstr):
+    lst = glob.glob('*.html')
+    for l in lst:
+        replace_text(l, oldstr, newstr)
+
 ############################################################
 
 if __name__ == "__main__":
