@@ -43,7 +43,10 @@ entity_table = {
     'oacute'    : u'ó',
     'quot'      : '"',
     'ugrave'    : u'ù',
-    'igrave'    : u'ì'
+    'igrave'    : u'ì',
+    'larr'      : u'←',
+    'rarr'      : u'→',
+    '-'         : u'-'
     }
 
 ############################################################
@@ -56,6 +59,7 @@ class Html2Text(SGMLParser):
     def reset(self):
         self.text = []
         self.start = 0
+        self.keep_start = 0
         self.ignore_style = 0
         SGMLParser.reset(self)
 
@@ -105,12 +109,13 @@ class Html2Text(SGMLParser):
             #铁磨标题开启
             if k == 'id' and string.find(v, 'chapter_title') == 0:
                 self.start = 1
+        self.start = 1
 
     def end_h1(self):
         #铁磨标题关闭
-##        if self.start:
-##            self.start = 0
-        pass
+       if self.start:
+           self.start = 0
+        # pass
         
     def start_p(self, attrs):
         self.add_crlf()
@@ -131,16 +136,34 @@ class Html2Text(SGMLParser):
             #铁磨正文开启
             if k == 'class' and v == 'page-content':
                 self.start = 1
+
+            if k == 'class' and v == 'bookname':
+                self.start = 1
+            elif k == 'name' and v == 'content':
+                self.start = 1
+                self.keep_start = 1
+            elif k == 'class' and v == 'bottem':
+                self.start = 0
+                self.keep_start = 0
+            elif k == 'id' and v == 'BookText':
+                self.start = 1
+            elif k == 'id' and v == 'htmlContent':
+                self.start = 1
+                self.keep_start = 1
+            elif k == 'id' and v == 'hm_t_25233':
+                self.start = 0
+                self.keep_start = 0
                 
         if self.start:
             self.add_crlf()
 
     def end_div(self):
-        self.start = 0
+        if not self.keep_start:
+            self.start = 0
 
         #铁磨正文关闭
-##        if self.start:
-##            self.start = 0
+        if self.start:
+           self.start = 0
             
         if self.start:
             self.add_crlf()
