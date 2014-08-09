@@ -7,7 +7,7 @@
 
 
 from sgmllib import SGMLParser
-import os, glob
+import os, glob, stat, time
 import string
 import re
 
@@ -1582,6 +1582,33 @@ def multi_replace_text(oldstr, newstr):
     lst = glob.glob('*.html')
     for l in lst:
         replace_text(l, oldstr, newstr)
+
+
+# 换转 Nikon 相机文件名
+def nikon_rename(ext='JPG`'):
+    lst = glob.glob('*.%s' % ext)
+    lst.sort()
+
+    last_name = ''
+    last_count = 0
+    count = 0
+    for l in lst:
+        if l[:4] != 'DSCN':
+            continue
+        jpg_date = time.localtime(os.stat(l)[stat.ST_MTIME])
+        jpg_name = time.strftime('%Y%m%d_%H%M%S', jpg_date)
+        if jpg_name == last_name:
+            last_count += 1
+            jpg_name += '_%d' % last_count
+        else:
+            last_name = jpg_name
+            last_count = 0
+        jpg_name += '.%s' % string.lower(ext)
+        print l, '->', jpg_name
+        os.rename(l, jpg_name)
+        count += 1
+    print 'total:', len(lst), 'rename:', count
+
 
 ############################################################
 
