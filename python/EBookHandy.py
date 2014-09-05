@@ -308,6 +308,28 @@ def get_chapter(text):
         p2 = len(text)
     return string.strip(text[p1+1:p2])
 
+
+# 找到指定前缀
+def is_begin_with(sentence):
+    keys = [
+        u'<span',
+        u'书名：',
+        u'类别：',
+        u'作者：',
+        u'章节错误',
+        u'书中之趣',
+        u'加入书架',
+        u'www.',
+        u'|打开书架',
+        u'】-二九小说网'
+        ]
+
+    for s in keys:
+        if string.find(sentence, s) == 0:
+            return True
+    return False
+
+
 MAX_TITLE_LENGTH = 36
     
 # 删除文本段落中的前后空格
@@ -418,6 +440,10 @@ def StripText(filename):
 
         if line[0] == '(':
             continue
+            
+        # 忽略特定行
+        # if is_begin_with(line):
+        #     continue
 
         # 收集段落未尾字符
         if coll_tail:
