@@ -1636,8 +1636,36 @@ def nikon_rename(ext='JPG`'):
     print 'total:', len(lst), 'rename:', count
 
 
+# 对文件名进行自然排序
+def sort_filename(names):
+    name_lens = []
+    for n in names:
+        l = len(n)
+        found = False
+        for i in name_lens:
+            if l == i:
+                found = True
+                break
+        if not found:
+            name_lens.append(l)
+
+    new_list = []
+    name_lens.sort()
+    for i in name_lens:
+        tmp_list = []
+        for n in names:
+            if len(n) == i:
+                tmp_list.append(n)
+        tmp_list.sort()
+        for n in tmp_list:
+            new_list.append(n)
+
+    print new_list
+
+
 ############################################################
 
 if __name__ == "__main__":
     print 'EBookHandy (C) 2002-2014 migrsoft'
     print 'Current folder: ' + os.getcwd()
+
