@@ -82,7 +82,7 @@ class Html2Text(SGMLParser):
             self.text.append(text)
         
     def start_body(self, attrs):
-        self.start = 0
+        self.start = 1
 
     def end_body(self):
         self.start = 0
@@ -113,9 +113,9 @@ class Html2Text(SGMLParser):
 
     def end_h1(self):
         #铁磨标题关闭
-       if self.start:
-           self.start = 0
-        # pass
+        # if self.start:
+        #     self.start = 0
+        pass
         
     def start_p(self, attrs):
         self.add_crlf()
@@ -158,12 +158,12 @@ class Html2Text(SGMLParser):
             self.add_crlf()
 
     def end_div(self):
-        if not self.keep_start:
-            self.start = 0
+        # if not self.keep_start:
+        #     self.start = 0
 
         #铁磨正文关闭
-        if self.start:
-           self.start = 0
+        # if self.start:
+        #    self.start = 0
             
         if self.start:
             self.add_crlf()
@@ -333,7 +333,7 @@ def is_begin_with(sentence):
 MAX_TITLE_LENGTH = 36
     
 # 删除文本段落中的前后空格
-def StripText(filename):
+def StripText(filename, style_marker = False):
     'Strip blank line in text file.'
 
     check_chapter = True # 是否自动识别章节
@@ -343,7 +343,7 @@ def StripText(filename):
 
     coll_title = False # 收集小标题
     coll_tail = False # 收集段落结束字符
-    style_marker = False # 是否生成样式替换标记
+    # style_marker = False # 是否生成样式替换标记
 
     tit = []
     indent = u'　　'
@@ -814,9 +814,8 @@ def MultiHtml2Text():
     if len(file_list) == 0:
         file_list = glob.glob('*.xhtml')
         
-    file_list.sort()
+    file_list = sort_filename(file_list)
     total = len(file_list)
-    parser = Html2Text()
     i = 0
     for fn in file_list:
         i += 1
@@ -1027,7 +1026,7 @@ def MultiText2One(lineSpace=2, skipTitle=False, addTag=True):
     'Join all text files to one.'
 
     file_list = glob.glob('*.txt')
-    file_list.sort()
+    file_list = sort_filename(file_list)
     total = len(file_list)
     
     i = 0
@@ -1639,6 +1638,7 @@ def nikon_rename(test=True, ext='JPG'):
 
 # 对文件名进行自然排序
 def sort_filename(names):
+    # 获取文件名列表的字符串长度分布
     name_lens = []
     for n in names:
         l = len(n)
@@ -1650,6 +1650,7 @@ def sort_filename(names):
         if not found:
             name_lens.append(l)
 
+    # 从最短长度文件名开始进行排序
     new_list = []
     name_lens.sort()
     for i in name_lens:
@@ -1661,7 +1662,7 @@ def sort_filename(names):
         for n in tmp_list:
             new_list.append(n)
 
-    print new_list
+    return new_list
 
 
 ############################################################
