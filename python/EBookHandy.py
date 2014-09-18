@@ -215,11 +215,37 @@ class mjdsParser(Html2TextParser):
                 Html2TextParser.handle_data(self, text)
 
 
+# http://lz.book.sohu.com
+class sohuParser(Html2TextParser):
+
+    def reset(self):
+        Html2TextParser.reset(self)
+        self.div_levels = 0
+
+    def start_body(self, attrs):
+        self.start = 0
+
+    def start_div(self, attrs):
+        for k, v in attrs:
+            if k == 'class' and v == 'book_con':
+                self.start = 1
+        if self.start:
+            self.div_levels += 1
+
+    def end_div(self):
+        if self.start:
+            self.div_levels -= 1
+            if self.div_levels == 0:
+                self.start = 0
+
+
 def ParserFactory():
-    kind = 'mjds'
+    kind = 'sohu'
 
     if kind == 'mjds':
         return mjdsParser()
+    elif kind == 'sohu':
+        return sohuParser()
     else:
         return Html2TextParser()
 
