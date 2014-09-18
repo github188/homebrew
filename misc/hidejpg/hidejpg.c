@@ -91,6 +91,7 @@ long get_length(FILE* fp)
 
 #define BUFFER_SIZE 1024 * 32
 
+// Write normal picutre
 int write_pic_a(FILE* dst, char* pic)
 {
     _UINT8* buf = (_UINT8*) malloc(BUFFER_SIZE);
@@ -116,6 +117,7 @@ int write_pic_a(FILE* dst, char* pic)
     return 0;
 }
 
+// Write embedded picture
 void write_pic_b(FILE* dst, char* pic)
 {
     _UINT8* buf = (_UINT8*) malloc(BUFFER_SIZE);
@@ -135,8 +137,7 @@ void write_pic_b(FILE* dst, char* pic)
             length -= read;
             fread(buf, 1, read, fp);
 
-            mark[0] = 0xFF;
-            mark[1] = 0xEF;
+            mark[0] = 0xFF; mark[1] = 0xEF; // marker used for embedded data
 
             mark_len = 2 + 1 + read + 4;
             mark[2] = mark_len >> 8 & 0xff;
@@ -146,9 +147,9 @@ void write_pic_b(FILE* dst, char* pic)
             fwrite(mark, 1, 5, dst);
             fwrite(buf, 1, read, dst);
 
+            // offset to marker begin
             mark_len += 2;
-            mark[0] = 0xEE;
-            mark[1] = 0xEE;
+            mark[0] = 0xEE; mark[1] = 0xEE;
             mark[2] = mark_len >> 8 & 0xff;
             mark[3] = mark_len & 0xff;
             fwrite(mark, 1, 4, dst);
@@ -179,8 +180,8 @@ void hide_pic(char* picA, char* picB)
     if (dst != NULL) {
         if (write_pic_a(dst, picA) == 0) {
             write_pic_b(dst, picB);
-            fputc(0xff, dst);
-            fputc(0xd9, dst);
+            // write EOI
+            fputc(0xFF, dst); fputc(0xD9, dst);
         }
         fclose(dst);
     }
