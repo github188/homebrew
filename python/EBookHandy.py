@@ -1667,14 +1667,15 @@ def multi_replace_text(oldstr, newstr):
 
 # 换转 Nikon 相机文件名
 def nikon_rename(test=True, ext='jpg'):
+    ext = string.lower(ext)
     lst = glob.glob('*.*')
     ext_len = len(ext)
     new_lst = []
     for n in lst:
-        n = string.lower(n)
-        if n[:4] != 'dscn' and n[:4] != 'cimg' and n[:4] != 'img_':
+        nl = string.lower(n)
+        if string.find('dscn,cimg,img_,imag', nl[:4]) == -1:
             continue
-        if n[-ext_len:] != ext:
+        if nl[-ext_len:] != ext:
             continue
         new_lst.append(n)
 
@@ -1685,19 +1686,30 @@ def nikon_rename(test=True, ext='jpg'):
     last_count = 0
     count = 0
     for l in lst:
+        if string.find('mp4,mov', ext) != -1:
+            jpg_name = 'VID_'
+        else:
+            jpg_name = 'IMG_'
+
         jpg_date = time.localtime(os.stat(l)[stat.ST_MTIME])
-        jpg_name = time.strftime('IMG_%Y%m%d_%H%M%S', jpg_date)
+        jpg_name += time.strftime('%Y%m%d_%H%M%S', jpg_date)
+
         if jpg_name == last_name:
             last_count += 1
             jpg_name += '_%02d' % last_count
         else:
             last_name = jpg_name
             last_count = 0
-        jpg_name += '.%s' % string.lower(ext)
-        print l, '->', jpg_name
-        if not test:
-            os.rename(l, jpg_name)
-        count += 1
+        jpg_name += '.%s' % ext
+
+        if l == jpg_name:
+            print l, 'does not need rename'
+        else:
+            print l, '->', jpg_name
+            if not test:
+                os.rename(l, jpg_name)
+            count += 1
+
     print 'total:', len(lst), 'rename:', count
 
 
