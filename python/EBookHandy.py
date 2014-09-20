@@ -1666,16 +1666,25 @@ def multi_replace_text(oldstr, newstr):
 
 
 # 换转 Nikon 相机文件名
-def nikon_rename(test=True, ext='JPG'):
-    lst = glob.glob('*.%s' % ext)
+def nikon_rename(test=True, ext='jpg'):
+    lst = glob.glob('*.*')
+    ext_len = len(ext)
+    new_lst = []
+    for n in lst:
+        n = string.lower(n)
+        if n[:4] != 'dscn' and n[:4] != 'cimg' and n[:4] != 'img_':
+            continue
+        if n[-ext_len:] != ext:
+            continue
+        new_lst.append(n)
+
+    lst = new_lst
     lst.sort()
 
     last_name = ''
     last_count = 0
     count = 0
     for l in lst:
-        if l[:4] != 'DSCN' and l[:4] != 'IMG_':
-            continue
         jpg_date = time.localtime(os.stat(l)[stat.ST_MTIME])
         jpg_name = time.strftime('IMG_%Y%m%d_%H%M%S', jpg_date)
         if jpg_name == last_name:
