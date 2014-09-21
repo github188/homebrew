@@ -60,7 +60,6 @@ class Html2TextParser(SGMLParser):
         SGMLParser.reset(self)
         self.text = []
         self.start = 0
-        self.keep_start = 0
         self.ignore_style = 0
 
     def add_crlf(self):
@@ -103,84 +102,21 @@ class Html2TextParser(SGMLParser):
     def do_br(self, attrs):
         if self.start:
             self.add_crlf()
-
-    def start_h1(self, attrs):
-#        for k,v in attrs:
-#            #铁磨标题开启
-#            if k == 'id' and string.find(v, 'chapter_title') == 0:
-#                self.start = 1
-        pass
-
-    def end_h1(self):
-        #铁磨标题关闭
-        # if self.start:
-        #     self.start = 0
-        pass
         
     def start_p(self, attrs):
         self.add_crlf()
-        self.quot_open = True
-##        for k,v in attrs:
-##            if k == 'class' and v == 'shangxia':
-##                self.start = 0
 
     def start_pre(self, attrs):
         self.add_crlf()
 
     def start_div(self, attrs):
-#        for k,v in attrs:
-#            if k == 'class' and v == 'chaptertitle clearfix':
-#                self.start = 1
-#            #铁磨正文开启
-#            if k == 'class' and v == 'page-content':
-#                self.start = 1
-#
-#            if k == 'class' and v == 'bookname':
-#                self.start = 1
-#            elif k == 'name' and v == 'content':
-#                self.start = 1
-#                self.keep_start = 1
-#            elif k == 'class' and v == 'bottem':
-#                self.start = 0
-#                self.keep_start = 0
-#            elif k == 'id' and v == 'BookText':
-#                self.start = 1
-#            elif k == 'id' and v == 'htmlContent':
-#                self.start = 1
-#                self.keep_start = 1
-#            elif k == 'id' and v == 'hm_t_25233':
-#                self.start = 0
-#                self.keep_start = 0
         if self.start:
             self.add_crlf()
 
     def end_div(self):
-        # if not self.keep_start:
-        #     self.start = 0
-
-        #铁磨正文关闭
-        # if self.start:
-        #    self.start = 0
-            
         if self.start:
             self.add_crlf()
 
-    # 特殊的处理
-    
-##    def start_font(self, attrs):
-##        if not self.start:
-##            return
-##
-##        # 如果是指定颜色的文字，增加标题标记
-##        for k,v in attrs:
-##            k = string.lower(k)
-##            v = string.lower(v)
-##            if k == 'color' and v == '#cc33cc':
-##                self.text.append('##t##')
-##
-##    def end_font(self):
-##        if self.start:
-##            self.add_crlf()
 
 # http://miaojiangdaoshi.513gp.org/ 
 class mjdsParser(Html2TextParser):
@@ -225,6 +161,14 @@ class sohuParser(Html2TextParser):
     def start_body(self, attrs):
         self.start = 0
 
+    def start_h2(self, attrs):
+        self.start = 1
+        self.div_levels = 1
+
+    def end_h2(self):
+        self.start = 0
+        self.div_levels = 0
+
     def start_div(self, attrs):
         for k, v in attrs:
             if k == 'class' and v == 'book_con':
@@ -238,9 +182,12 @@ class sohuParser(Html2TextParser):
             if self.div_levels == 0:
                 self.start = 0
 
+    def handle_data(self, text):
+        if self.start and self.div_levels == 1:
+            Html2TextParser.handle_data(self, text)
 
-def ParserFactory():
-    kind = 'sohu'
+
+def ParserFactory(kind):
 
     if kind == 'mjds':
         return mjdsParser()
@@ -864,12 +811,17 @@ def multiFormatPara(path):
         i += 1
         formatPara(fn, name)
         
+
 ############################################################
 # Functions work on one or more files.
 #
 
-def MultiHtml2Text():
+def MultiHtml2Text(kind='-'):
     'Convert all files in html format to pure text.'
+
+    if kind == '-':
+        print 'kind: mjds, sohu, normal'
+        return
 
     file_list = glob.glob('*.htm')
     if len(file_list) == 0:
@@ -885,9 +837,13 @@ def MultiHtml2Text():
         txtfile = fn[:string.rfind(fn, '.')] + '.txt'
         print '(%d of %d) Converting %s ==> %s' % (i, total, fn, txtfile)
 
-        ConvHtml2Text(fn, txtfile)
+        ConvHtml2Text(fn, txtfile, kind)
 
     print 'Total: %d' % total
+
+
+def h2t(kind='-'):
+    MultiHtml2Text(kind)
 
 
 def MultiTextStrip():
@@ -1112,6 +1068,11 @@ def MultiText2One(lineSpace=2, skipTitle=False, addTag=True):
     print 'All finished!'
 
 
+def t2one():
+    MultiText2One(2, False, False)
+    os.rename('all', 'book.txt')
+
+
 def HZFull2Half():
     ''
 ##    return
@@ -1165,9 +1126,9 @@ def DeleteFiles(extName):
 
 ##################################################
 
-def ConvHtml2Text(fin, fout):
+def ConvHtml2Text(fin, fout, kind):
 
-    parser = ParserFactory()
+    parser = ParserFactory(kind)
     
     f = open(fin, 'r')
     txt = f.read()
@@ -1636,14 +1597,15 @@ def renameHtmInPage(fname, order=1):
                 os.rename(name_e, name_n)
 
 
-def renamePic(prefix):
+def renamePic(prefix, start=1):
     lst = glob.glob('*');
     lst.sort()
 
-    c = 1
     for l in lst:
-        name = '%s%03d.jpg' % (prefix, c)
-        c += 1
+        if os.path.isdir(l):
+            continue
+        name = '%s%03d.jpg' % (prefix, start)
+        start += 1
         print l, '-->', name
         os.rename(l, name)
 
