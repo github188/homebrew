@@ -10,6 +10,7 @@ from sgmllib import SGMLParser
 import os, glob, stat, time
 import string
 import re
+import subprocess
 
 # 小标题不具备的标号
 punct_not_in_subtitle = u'！。？…：'
@@ -1627,8 +1628,32 @@ def multi_replace_text(oldstr, newstr):
         replace_text(l, oldstr, newstr)
 
 
+INVALID_DATE_TIME = '00000000_000000'
+
+def get_datetime_exif(fname):
+    args = ['exif', '-t', '0x9003']
+    args.append(fname)
+    child = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = child.communicate()
+    if child.returncode:
+        return INVALID_DATE_TIME
+
+    marker = 'Value:'
+    pos = string.find(stdout, marker)
+    if pos == -1:
+        return INVALID_DATE_TIME
+    dt = string.strip(stdout[pos + len(marker):])
+    dt = string.replace(dt, ':', '')
+    dt = string.replace(dt, ' ', '_')
+    return dt
+
+def get_datetime_file(fname):
+    dt = time.localtime(os.stat(fname)[stat.ST_MTIME])
+    dt = time.strftime('%Y%m%d_%H%M%S', dt)
+    return dt
+
 # 换转 Nikon 相机文件名
-def nikon_rename(test=True, ext='jpg'):
+def nikon_rename(test=True, ext='jpg', exif=False):
     ext = string.lower(ext)
     lst = glob.glob('*.*')
     ext_len = len(ext)
@@ -1653,8 +1678,16 @@ def nikon_rename(test=True, ext='jpg'):
         else:
             jpg_name = 'IMG_'
 
-        jpg_date = time.localtime(os.stat(l)[stat.ST_MTIME])
-        jpg_name += time.strftime('%Y%m%d_%H%M%S', jpg_date)
+        info = ''
+        if exif:
+            jpg_date_str = get_datetime_exif(l)
+            if jpg_date_str == INVALID_DATE_TIME:
+                info = '*'
+                jpg_date_str = get_datetime_file(l)
+        else:
+            jpg_date_str = get_datetime_file(l)
+
+        jpg_name += jpg_date_str
 
         if jpg_name == last_name:
             last_count += 1
@@ -1667,7 +1700,7 @@ def nikon_rename(test=True, ext='jpg'):
         if l == jpg_name:
             print l, 'does not need rename'
         else:
-            print l, '->', jpg_name
+            print l, '->', jpg_name, info
             if not test:
                 os.rename(l, jpg_name)
             count += 1
