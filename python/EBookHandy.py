@@ -11,6 +11,7 @@ import os, glob, stat, time
 import string
 import re
 import subprocess
+import exifread
 
 # 小标题不具备的标号
 punct_not_in_subtitle = u'！。？…：'
@@ -1647,6 +1648,20 @@ def get_datetime_exif(fname):
     dt = string.replace(dt, ' ', '_')
     return dt
 
+def get_datetime_exifread(fname):
+    f = open(fname, 'rb')
+    tags = exifread.process_file(f)
+    f.close()
+    if len(tags) == 0:
+        return INVALID_DATE_TIME
+    marker = 'Image DateTime'
+    if not tags.has_key(marker):
+        return INVALID_DATE_TIME
+    dt = tags[marker].values
+    dt = string.replace(dt, ':', '')
+    dt = string.replace(dt, ' ', '_')
+    return dt    
+
 def get_datetime_file(fname):
     dt = time.localtime(os.stat(fname)[stat.ST_MTIME])
     dt = time.strftime('%Y%m%d_%H%M%S', dt)
@@ -1680,7 +1695,8 @@ def nikon_rename(test=True, ext='jpg', exif=False):
 
         info = ''
         if exif:
-            jpg_date_str = get_datetime_exif(l)
+            #jpg_date_str = get_datetime_exif(l)
+            jpg_date_str = get_datetime_exifread(l)
             if jpg_date_str == INVALID_DATE_TIME:
                 info = '*'
                 jpg_date_str = get_datetime_file(l)
@@ -1698,7 +1714,7 @@ def nikon_rename(test=True, ext='jpg', exif=False):
         jpg_name += '.%s' % ext
 
         if l == jpg_name:
-            print l, 'does not need rename'
+            print l, '--'
         else:
             print l, '->', jpg_name, info
             if not test:
