@@ -1659,6 +1659,7 @@ def get_datetime_exifread(fname):
         return INVALID_DATE_TIME
     dt = tags[marker].values
     dt = string.replace(dt, ':', '')
+    dt = string.replace(dt, '-', '')
     dt = string.replace(dt, ' ', '_')
     return dt    
 
