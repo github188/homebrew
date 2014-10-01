@@ -1732,6 +1732,49 @@ def sort_filename(names):
     return new_list
 
 
+def create_cbz(name, ziplist):
+    zipname = '%s.cbz' % name
+    print 'create', zipname, 'with', len(ziplist), 'files'
+    if os.path.exists(zipname):
+        print '  exist!'
+        return
+    args = ['zip', zipname]
+    for i in ziplist:
+        args.append(i)
+    child = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = child.communicate()
+    if child.returncode:
+        print stderr
+
+def create_multi_cbz(prefix='test', order=1, end=False):
+    files_per_cbz = 20
+    lst = glob.glob('*.jpg')
+    n = order
+    c = 1
+    ziplist = []
+    last = ''
+    for i in lst:
+        if c > files_per_cbz:
+            name = '%s%03d' % (prefix, n)
+            create_cbz(name, ziplist)
+            last = ziplist[-1]
+            c = 1
+            n += 1
+            for l in ziplist:
+                os.remove(l)
+            ziplist = []
+
+        if c <= files_per_cbz:
+            ziplist.append(i)
+            c += 1
+
+    if end:
+        name = '%s%03d' % (prefix, n)
+        create_cbz(name, ziplist)
+    else:
+        print 'last processed:', last
+
+
 ############################################################
 
 if __name__ == "__main__":
