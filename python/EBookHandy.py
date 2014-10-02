@@ -1608,7 +1608,9 @@ def multi_replace_text(oldstr, newstr):
 
 
 INVALID_DATE_TIME = '00000000_000000'
+DATE_TIME_PATTERN = '^\d\d\d\d-\d\d-\d\d \d\d\d\d\d\d$'
 
+# 使用外部 exif 程序获取图片日期
 def get_datetime_exif(fname):
     args = ['exif', '-t', '0x9003']
     args.append(fname)
@@ -1626,6 +1628,7 @@ def get_datetime_exif(fname):
     dt = string.replace(dt, ' ', '_')
     return dt
 
+# 使用 python exifread 库获取图片日期
 def get_datetime_exifread(fname):
     f = open(fname, 'rb')
     tags = exifread.process_file(f)
@@ -1641,13 +1644,26 @@ def get_datetime_exifread(fname):
     dt = string.replace(dt, ' ', '_')
     return dt    
 
+# 使用文件编辑时间作为图片日期
 def get_datetime_file(fname):
     dt = time.localtime(os.stat(fname)[stat.ST_MTIME])
     dt = time.strftime('%Y%m%d_%H%M%S', dt)
     return dt
 
+# 使用文件名作为图片日期
+def get_datetime_name(fname):
+    pos = string.rfind(fname, '.')
+    if pos == -1:
+        return INVALID_DATE_TIME
+    name = fname[:pos]
+    if not re.match(DATE_TIME_PATTERN, name):
+        return INVALID_DATE_TIME
+    name = string.replace(name, '-', '')
+    name = string.replace(name, ' ', '_')
+    return name
+
 # 换转 Nikon 相机文件名
-def nikon_rename(test=True, ext='jpg', exif=False):
+def nikon_rename(exif=False, test=True, ext='jpg'):
     ext = string.lower(ext)
     lst = glob.glob('*.*')
     ext_len = len(ext)
@@ -1679,6 +1695,7 @@ def nikon_rename(test=True, ext='jpg', exif=False):
             if jpg_date_str == INVALID_DATE_TIME:
                 info = '*'
                 jpg_date_str = get_datetime_file(l)
+                # jpg_date_str = get_datetime_name(l)
         else:
             jpg_date_str = get_datetime_file(l)
 
