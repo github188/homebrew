@@ -120,7 +120,8 @@ class Html2TextParser(SGMLParser):
             self.add_crlf()
 
 
-# http://miaojiangdaoshi.513gp.org/ 
+# 苗疆道事
+# http://miaojiangdaoshi.513gp.org/
 class mjdsParser(Html2TextParser):
 
     def reset(self):
@@ -153,6 +154,52 @@ class mjdsParser(Html2TextParser):
                 Html2TextParser.handle_data(self, text)
 
 
+# 扎纸匠
+class zzjParser(Html2TextParser):
+
+    def reset(self):
+        Html2TextParser.reset(self)
+
+    def start_body(self, attrs):
+        self.start = 0
+
+    def start_h1(self, attrs):
+        self.start = 1
+
+    def end_h1(self):
+        self.start = 0
+
+    def start_div(self, attrs):
+        for k, v in attrs:
+            if k == 'id' and v == 'BookText':
+                self.start = 1
+
+    def end_div(self):
+        self.start = 0
+
+    def handle_data(self, text):
+        if self.start:
+            text = string.lower(text)
+            # print '[', text, ']'
+            text = string.replace(text, u'趣~读~屋', '')
+            text = string.replace(text, u'趣/读/屋', '')
+            text = string.replace(text, u'趣*读/屋', '')
+            text = string.replace(text, u'趣*讀/屋', '')
+            text = string.replace(text, 'www.quduwu.com', '')
+            text = string.replace(text, 'www.ziyouge.com', '')
+            if string.find(text, u'手机用户') != -1:
+                self.start = 0
+                return
+            pos = string.find(text, u'正文')
+            if pos >= 0:
+                text = text[pos + 2:]
+                pos = string.find(text, u'为')
+                if pos != -1:
+                    text = text[:pos]
+            Html2TextParser.handle_data(self, text)
+
+
+# 搜狐读书
 # http://lz.book.sohu.com
 class sohuParser(Html2TextParser):
 
@@ -195,6 +242,8 @@ def ParserFactory(kind):
         return mjdsParser()
     elif kind == 'sohu':
         return sohuParser()
+    elif kind == 'zzj':
+        return zzjParser()
     else:
         return Html2TextParser()
 
@@ -796,8 +845,9 @@ def multiFormatPara(path):
 def MultiHtml2Text(kind='-'):
     'Convert all files in html format to pure text.'
 
-    if kind == '-':
-        print 'kind: mjds, sohu, normal'
+    all_kinds = 'mjds, sohu, zzj, normal'
+    if string.find(all_kinds, kind) == -1:
+        print 'kind:', all_kinds
         return
 
     file_list = glob.glob('*.htm')
@@ -1114,7 +1164,11 @@ def ConvHtml2Text(fin, fout, kind):
     txt = f.read()
     f.close()
 
-    txt = unicode(txt, 'utf8', 'ignore')
+    encode = 'utf8'
+    if kind == 'zzj':
+        encode = 'gbk'
+
+    txt = unicode(txt, encode, 'ignore')
     
     parser.reset()
     parser.feed(txt)
