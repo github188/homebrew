@@ -64,6 +64,12 @@ class Html2TextParser(SGMLParser):
         self.start = 0
         self.ignore_style = 0
 
+    def del_str_with_re(self, pattern, text):
+        m = re.findall(pattern, text)
+        for s in m:
+            text = string.replace(text, s, '')
+        return text
+
     def add_crlf(self):
         self.text.append(u'\n')
         
@@ -179,23 +185,24 @@ class zzjParser(Html2TextParser):
 
     def handle_data(self, text):
         if self.start:
-            text = string.lower(text)
+            text = string.strip(text)
             # print '[', text, ']'
-            text = string.replace(text, u'趣~读~屋', '')
-            text = string.replace(text, u'趣/读/屋', '')
-            text = string.replace(text, u'趣*读/屋', '')
-            text = string.replace(text, u'趣*讀/屋', '')
-            text = string.replace(text, 'www.quduwu.com', '')
-            text = string.replace(text, 'www.ziyouge.com', '')
-            if string.find(text, u'手机用户') != -1:
+            text = Html2TextParser.del_str_with_re(self, u'趣.{3}屋', text)
+            text = Html2TextParser.del_str_with_re(self, u'www\..{6,7}\.com', text)
+
+            if string.find(text, u'手机用户') == 0:
                 self.start = 0
                 return
+            if string.find(text, 'ps') == 0:
+                return
+
             pos = string.find(text, u'正文')
             if pos >= 0:
                 text = text[pos + 2:]
                 pos = string.find(text, u'为')
                 if pos != -1:
                     text = text[:pos]
+
             Html2TextParser.handle_data(self, text)
 
 
@@ -499,18 +506,18 @@ def StripText(filename, style_marker = False):
                 if string.find(tail, line[-1]) == -1:
                     found = 2
                 
-##            ttt = get_chapter(line)
-##            if len(ttt) > 0:
-##                if ttt == chap:
-##                    row += 1
-##                    continue
-##                else:
-##                    print ttt
-##                    chap = ttt
-##                    line = u'※ ' + chap
-##                    found = 0
-##                    ischapter = True
-##                    txt.write('\n')
+            # ttt = get_chapter(line)
+            # if len(ttt) > 0:
+            #    if ttt == chap:
+            #        row += 1
+            #        continue
+            #    else:
+            #        print ttt
+            #        chap = ttt
+            #        line = u'※ ' + chap
+            #        found = 0
+            #        ischapter = True
+            #        txt.write('\n')
 
             if found > 0:
                 t1 = string.strip(line[:pos])
@@ -548,8 +555,8 @@ def StripText(filename, style_marker = False):
         if ischapter and not style_marker:
             txt.write('\n') # 在章节标题后加入一空行
 
-##        if check_title and row == 0 and not style_marker: #小标题空一行
-##            txt.write('\n')
+        # if check_title and row == 0 and not style_marker: #小标题空一行
+        #     txt.write('\n')
             
         row += 1
 
