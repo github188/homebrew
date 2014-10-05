@@ -676,6 +676,10 @@ def down_pic(host, referer, dm, prefix='mh'):
     f = open('t', 'r')
     data = f.read()
     f.close()
+
+    data = string.strip(data)
+    data = string.replace(data, '"', '')
+
     lst = string.split(data, '|')
 
     i = 1
