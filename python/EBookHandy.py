@@ -238,8 +238,17 @@ class sohuParser(Html2TextParser):
             if self.div_levels == 0:
                 self.start = 0
 
+    def start_span(self, attrs):
+        if self.start:
+            self.div_levels += 1
+
+    def end_span(self):
+        if self.start:
+            self.div_levels -= 1
+
     def handle_data(self, text):
         if self.start and self.div_levels == 1:
+            text = string.strip(text)
             Html2TextParser.handle_data(self, text)
 
 
@@ -267,16 +276,24 @@ def IncludeChar(text, match):
 def isChapter(txt, toc):
 
     # 常见文字
-    tm = [u'引子', u'楔子',
-          u'自序', u'序言', u'序一', u'序二', u'推荐序', u'序',
-          u'前言', u'引言',
-          u'后记', u'译后记', u'尾声', u'附录',
-          u'※']
+    tm = [
+        u'简介', u'作者简介',
+        u'引子', u'楔子',
+        u'自序', u'序言', u'序一', u'序二', u'推荐序', u'序',
+        u'前言', u'引言',
+        u'后记', u'译后记', u'尾声', u'附录',
+        u'※'
+    ]
     
     for m in tm:
         p1 = string.find(txt, m)
         if p1 == 0:
             return (1, len(m))
+
+    # # 标题(1)
+    # if re.search(u'\(\d{1,2}\)$', txt):
+    #     return (1, len(txt))
+    # return (0, 0)
 
     p1 = string.find(txt, u'第')
     
