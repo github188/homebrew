@@ -689,6 +689,7 @@ def down_pic(host, referer, dm, prefix='mh'):
         else:
             url = '/dm%s/%s' % (dm, name)
         fn = '%s_%03d.jpg' % (prefix, i)
+        info = '(%03d/%03d)' % (i, len(lst))
         i += 1
 
         if os.access(fn, os.W_OK):
@@ -713,9 +714,9 @@ def down_pic(host, referer, dm, prefix='mh'):
             f = open(fn, 'wb')
             f.write(data)
             f.close()
-            print url, '->', fn, len(data)
+            print info, url, '->', fn, len(data)
         else:
-            print url, '->', fn, 'error'
+            print info, url, '->', fn, 'error'
     
 
 def test_decode(fname):
