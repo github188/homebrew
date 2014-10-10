@@ -1,6 +1,13 @@
 package com.migrsoft.main;
 
-public class TaskData {
+import java.io.Serializable;
+
+public class TaskData implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public int[] sides;
 	

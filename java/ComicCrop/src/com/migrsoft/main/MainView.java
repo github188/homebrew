@@ -9,6 +9,10 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -36,7 +40,7 @@ public class MainView extends JFrame {
 	private static final long serialVersionUID = 778619808848682268L;
 	
 	private static final String sMainTitle = "ComicCrop";
-	private static final String sVersion = "1.3.3";
+	private static final String sVersion = "1.4.0";
 	
 	private PicEditor mEditor;
 	private PicList mList;
@@ -60,6 +64,8 @@ public class MainView extends JFrame {
 	
 	private final String menuFile = "文件";
 	private final String menuFileOpen = "打开图片";
+	private final String menuFileReadTask = "读取任务";
+	private final String menuFileSaveTask = "保存任务";
 	private final String menuFileTest = "测试";
 	
 	private final String menuPic = "图片";
@@ -104,6 +110,12 @@ public class MainView extends JFrame {
 				
 				if (cmd.equals(menuFileOpen)) {
 					openFile();
+				}
+				else if (cmd.equals(menuFileReadTask)) {
+					readTasks();
+				}
+				else if (cmd.equals(menuFileSaveTask)) {
+					saveTasks();
 				}
 				else if (cmd.equals(menuFileTest)) {
 				}
@@ -201,12 +213,21 @@ public class MainView extends JFrame {
 		
 		JMenuItem file_open = new JMenuItem(menuFileOpen);
 		file_open.addActionListener(menuHandler);
+		
+		JMenuItem file_read_task = new JMenuItem(menuFileReadTask);
+		file_read_task.addActionListener(menuHandler);
+		
+		JMenuItem file_save_task = new JMenuItem(menuFileSaveTask);
+		file_save_task.addActionListener(menuHandler);
 
 		JMenuItem file_test = new JMenuItem(menuFileTest);
 		file_test.addActionListener(menuHandler);
 		
 		file.add(file_open);
-//		file.addSeparator();
+		file.addSeparator();
+		file.add(file_read_task);
+		file.add(file_save_task);
+		
 //		file.add(file_test);
 		
 		////////////////////////////////////////////////////////////
@@ -495,7 +516,7 @@ public class MainView extends JFrame {
 		setTitle(sMainTitle + " " + index + " | " + total);
 	}
 	
-	private HashMap<String, TaskData> mTaskInfo;
+	private HashMap<String, TaskData> mTaskInfo = null;
 	
 	private void openFile() {
 		JFileChooser dlg = new JFileChooser();
@@ -561,6 +582,35 @@ public class MainView extends JFrame {
 		
 		mBoard.useCropMode();
 		mEditor.useCropMode();
+	}
+
+	private final String TASK_FILE_NAME = "comic_tasks.dat";
+	
+	private void readTasks() {
+		try {
+			FileInputStream fs = new FileInputStream(TASK_FILE_NAME);
+			ObjectInputStream os = new ObjectInputStream(fs);
+			Object tasks = os.readObject();
+			os.close();
+			if (tasks instanceof HashMap<?, ?>) {
+				mTaskInfo = (HashMap<String, TaskData>)tasks;
+				mEditor.reload();
+			}
+		} catch (Exception e) {
+		}
+	}
+	
+	private void saveTasks() {
+		if (mTaskInfo == null)
+			return;
+		mEditor.saveTaskData();
+		try {
+			FileOutputStream fs = new FileOutputStream(TASK_FILE_NAME);
+			ObjectOutputStream os = new ObjectOutputStream(fs);
+			os.writeObject(mTaskInfo);
+			os.close();
+		} catch (Exception e) {
+		}
 	}
 	
 	private void clearTempDir(String path) {
