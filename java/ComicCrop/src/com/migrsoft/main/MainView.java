@@ -60,10 +60,12 @@ public class MainView extends JFrame {
 		setSize((int)(screen.getWidth() * 0.9f), (int)(screen.getHeight() * 0.9f));
 		setLocation((int)(screen.getWidth() - getWidth()) / 2, (int)(screen.getHeight() - getHeight()) / 2);
 		setVisible(true);
+		setResizable(false);
 	}
 	
 	private final String menuFile = "文件";
 	private final String menuFileOpen = "打开图片";
+	private final String menuFileResize = "窗口大小锁定";
 	private final String menuFileReadTask = "读取任务";
 	private final String menuFileSaveTask = "保存任务";
 	private final String menuFileTest = "测试";
@@ -110,6 +112,9 @@ public class MainView extends JFrame {
 				
 				if (cmd.equals(menuFileOpen)) {
 					openFile();
+				}
+				else if (cmd.equals(menuFileResize)) {
+					resizeWindow();
 				}
 				else if (cmd.equals(menuFileReadTask)) {
 					readTasks();
@@ -214,6 +219,9 @@ public class MainView extends JFrame {
 		JMenuItem file_open = new JMenuItem(menuFileOpen);
 		file_open.addActionListener(menuHandler);
 		
+		JMenuItem file_resize = new JMenuItem(menuFileResize);
+		file_open.addActionListener(menuHandler);
+		
 		JMenuItem file_read_task = new JMenuItem(menuFileReadTask);
 		file_read_task.addActionListener(menuHandler);
 		
@@ -224,6 +232,8 @@ public class MainView extends JFrame {
 		file_test.addActionListener(menuHandler);
 		
 		file.add(file_open);
+		file.addSeparator();
+		file.add(file_resize);
 		file.addSeparator();
 		file.add(file_read_task);
 		file.add(file_save_task);
@@ -584,6 +594,12 @@ public class MainView extends JFrame {
 		mEditor.useCropMode();
 	}
 
+	private void resizeWindow() {
+		boolean b = isResizable();
+		b = !b;
+		setResizable(b);
+	}
+	
 	private final String TASK_FILE_NAME = "comic_tasks.dat";
 	
 	private void readTasks() {
