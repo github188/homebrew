@@ -613,7 +613,7 @@ public class PicEditor extends JPanel {
 			
 			// 计算灰阶
 			if (MainParam.getInstance().isAutoGrayLevel()) {
-				if ((td != null && td.gray) || PicWorker.isGrayMode(mImage)) {
+				if ((td != null && td.gray) || PicWorker.isGrayMode(mImage) || MainParam.getInstance().isForceGray()) {
 					mIsGray = true;
 					mModified = PicWorker.autoGrayLevel(mImage);
 				}

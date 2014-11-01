@@ -80,6 +80,7 @@ public class MainView extends JFrame {
 	
 	private final String menuPic = "图片";
 	private final String menuPicToGray = "转换为灰度图";
+	private final String menuPicForceGray = "强制计算灰阶";
 	private final String menuPicAutoGrayLevel = "自动计算灰阶";
 	private final String menuPicOutputPng = "输出为 PNG 格式";
 	private final String menuPicOutputJpeg = "输出为 JPEG 格式（质量：中）";
@@ -134,6 +135,11 @@ public class MainView extends JFrame {
 				}
 				else if (cmd.equals(menuPicToGray)) {
 					mEditor.toGrayMode();
+				}
+				else if (cmd.equals(menuPicForceGray)) {
+					JCheckBoxMenuItem item = (JCheckBoxMenuItem)event.getSource();
+					MainParam.getInstance().setForceGray(item.isSelected());
+					mEditor.reload();
 				}
 				else if (cmd.equals(menuPicAutoGrayLevel)) {
 					JCheckBoxMenuItem item = (JCheckBoxMenuItem)event.getSource();
@@ -256,6 +262,9 @@ public class MainView extends JFrame {
 		JMenuItem pic_gray = new JMenuItem(menuPicToGray);
 		pic_gray.addActionListener(menuHandler);
 		
+		JCheckBoxMenuItem pic_forceGray = new JCheckBoxMenuItem(menuPicForceGray, MainParam.getInstance().isForceGray());
+		pic_forceGray.addActionListener(menuHandler);
+		
 		JCheckBoxMenuItem pic_autoGrayLevel = new JCheckBoxMenuItem(menuPicAutoGrayLevel, MainParam.getInstance().isAutoGrayLevel());
 		pic_autoGrayLevel.addActionListener(menuHandler);
 		
@@ -307,6 +316,7 @@ public class MainView extends JFrame {
 		
 		pic.add(pic_gray);
 		pic.addSeparator();
+		pic.add(pic_forceGray);
 		pic.add(pic_autoGrayLevel);
 		pic.addSeparator();
 		pic.add(pic_formatPng);

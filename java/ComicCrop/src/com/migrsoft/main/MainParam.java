@@ -15,6 +15,7 @@ public class MainParam {
 	
 	private int mOutputType;
 	private float mJpegQuality;
+	private boolean mForceGray;
 	private boolean mAutoGrayLevel;
 	
 	private int mMaxThreads;
@@ -27,6 +28,7 @@ public class MainParam {
 	public MainParam() {
 		mOutputType = OUTPUT_FORMAT_PNG;
 		mJpegQuality = 0.5f;
+		mForceGray = false;
 		mAutoGrayLevel = true;
 		mMaxThreads = 2;
 		mCropWhite = true;
@@ -60,6 +62,14 @@ public class MainParam {
 		this.mJpegQuality = quality;
 	}
 
+	public boolean isForceGray() {
+		return mForceGray;
+	}
+	
+	public void setForceGray(boolean force) {
+		mForceGray = force;
+	}
+	
 	public boolean isAutoGrayLevel() {
 		return mAutoGrayLevel;
 	}

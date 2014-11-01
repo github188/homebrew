@@ -88,7 +88,7 @@ public class BatchTask {
 				td = mTaskInfo.get(name);
 				
 				if (MainParam.getInstance().isAutoGrayLevel()) {
-					if ((td != null && td.gray) || PicWorker.isGrayMode(image)) {
+					if ((td != null && td.gray) || PicWorker.isGrayMode(image) || MainParam.getInstance().isForceGray()) {
 						PicWorker.autoGrayLevel(image);
 					}
 				}
