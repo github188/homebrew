@@ -32,6 +32,14 @@ import javax.swing.filechooser.FileFilter;
 
 import com.migrsoft.main.ProgressDlg.TaskType;
 
+/**
+ * @author wuyulun
+ *
+ */
+/**
+ * @author wuyulun
+ *
+ */
 public class MainView extends JFrame {
 
 	/**
@@ -220,7 +228,7 @@ public class MainView extends JFrame {
 		file_open.addActionListener(menuHandler);
 		
 		JMenuItem file_resize = new JMenuItem(menuFileResize);
-		file_open.addActionListener(menuHandler);
+		file_resize.addActionListener(menuHandler);
 		
 		JMenuItem file_read_task = new JMenuItem(menuFileReadTask);
 		file_read_task.addActionListener(menuHandler);
@@ -603,6 +611,10 @@ public class MainView extends JFrame {
 	private final String TASK_FILE_NAME = "comic_tasks.dat";
 	
 	private void readTasks() {
+		if (JOptionPane.showConfirmDialog(
+				this, "是否读取保存的工作？", "读取确认", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
+			return;
+		
 		try {
 			FileInputStream fs = new FileInputStream(TASK_FILE_NAME);
 			ObjectInputStream os = new ObjectInputStream(fs);
@@ -619,6 +631,11 @@ public class MainView extends JFrame {
 	private void saveTasks() {
 		if (mTaskInfo == null)
 			return;
+		
+		if (JOptionPane.showConfirmDialog(
+				this, "是否保存现在工作？", "保存确认", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
+			return;
+		
 		mEditor.saveTaskData();
 		try {
 			FileOutputStream fs = new FileOutputStream(TASK_FILE_NAME);
