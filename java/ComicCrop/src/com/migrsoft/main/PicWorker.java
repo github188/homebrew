@@ -27,7 +27,8 @@ public class PicWorker {
 		try {
 			image = ImageIO.read(new File(path));
 			if (   image.getType() == BufferedImage.TYPE_BYTE_BINARY
-				|| image.getType() == BufferedImage.TYPE_BYTE_INDEXED) {
+				|| image.getType() == BufferedImage.TYPE_BYTE_INDEXED
+				|| MainParam.getInstance().isForceGray()) {
 				image = convertToGray(image);
 			}
 		}
