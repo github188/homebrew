@@ -662,6 +662,41 @@ def splitTextOutput(no, content):
     f.close()
 
 
+# 将文本按章节拆分成一定字数的多个文本
+def SplitTextToSize(fname, prefix=''):
+    TXT_NAME = 'book_%02d.txt'
+    if prefix != '':
+        TXT_NAME = '%s%%02d.txt' % prefix
+    TXT_SIZE = 300000
+
+    f = open(fname, 'r')
+    lines = f.readlines()
+    f.close()
+
+    count = 0
+    no = 1
+    name = TXT_NAME % no
+    f = open(name, 'w')
+    for text in lines:
+        t = unicode(text, 'gbk')
+        count = count + len(t)
+        t = string.strip(t)
+        if len(t) < MAX_TITLE_LENGTH:
+            m = isChapter(t, '')
+            if m[0] != 0 and count > TXT_SIZE:
+                f.close()
+                print '%s %d' % (name, count)
+                count = 0
+                no = no + 1
+                name = TXT_NAME % no
+                f = open(name, 'w')
+                f.write(text)
+                text = ''
+        if len(text) > 0:
+            f.write(text)
+    f.close()
+    print '%s %d' % (name, count)
+
 
 def AdjustComment(filename):
     ''
