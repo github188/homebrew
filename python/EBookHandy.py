@@ -252,6 +252,33 @@ class sohuParser(Html2TextParser):
             Html2TextParser.handle_data(self, text)
 
 
+# 一般网文
+class NovelParser(Html2TextParser):
+
+    def reset(self):
+        Html2TextParser.reset(self)
+
+    def start_body(self, attrs):
+        self.start = 0
+
+    def start_div(self, attrs):
+        for k, v in attrs:
+            if k == 'class' and v == 'bookname':
+                self.start = 1
+            elif k == 'id' and v == 'content':
+                self.start = 1
+
+    def handle_data(self, text):
+        if self.start:
+            if string.find(text, 'http') != -1:
+                #print '-->', text
+                return
+            Html2TextParser.handle_data(self, text)
+
+    def end_div(self):
+        self.start = 0
+
+
 def ParserFactory(kind):
 
     if kind == 'mjds':
@@ -260,6 +287,8 @@ def ParserFactory(kind):
         return sohuParser()
     elif kind == 'zzj':
         return zzjParser()
+    elif kind == 'novel':
+        return NovelParser()
     else:
         return Html2TextParser()
 
@@ -904,7 +933,7 @@ def multiFormatPara(path):
 def MultiHtml2Text(kind='-'):
     'Convert all files in html format to pure text.'
 
-    all_kinds = 'mjds, sohu, zzj, normal'
+    all_kinds = 'mjds, sohu, zzj, novel, normal'
     if string.find(all_kinds, kind) == -1:
         print 'kind:', all_kinds
         return
