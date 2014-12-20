@@ -745,7 +745,8 @@ def AdjustComment(filename):
     file.close()
 
 
-def JoinBreakLine(filename, detail=False):
+# 将按宽度分行的段落进行拼接
+def JoinBreakLine(filename, width=0, detail=False):
     'Join one or more hard break lines into one normal paragraph.'
 
     print u'段落拼接: ', filename
@@ -782,6 +783,8 @@ def JoinBreakLine(filename, detail=False):
     
     line_width = word_total / avail_lines
 
+    if width != 0:
+        line_width = width
     if detail:
         print u'行数: %d 可能的拆行宽度: %d ' % (avail_lines, line_width)
 
@@ -1932,6 +1935,84 @@ def create_multi_cbz(prefix='test', order=1, end=False):
         create_cbz(name, ziplist)
     else:
         print 'last processed:', last
+
+
+# 转换数字为章节
+def num_to_chapter(title):
+    title = string.strip(title)
+
+    if not title[0].isdigit():
+        return title
+
+    num = []
+    pos = 0
+    for c in title:
+        if c.isdigit():
+            num.append(int(c))
+            pos += 1
+        else:
+            break
+
+    chs = u'零一二三四五六七八九'
+    bei = u'十百'
+    n = len(num)
+    new_title = ''
+
+    for i in range(n):
+        skip = False
+        if n == 3 and i == 1 and num[1] == 0 and num[2] == 0:
+            break
+        if i == 2 and num[i] == 0:
+            break
+        new_title += chs[num[i]]
+        if n == 3 and i == 1 and num[1] == 0:
+            skip = True
+        j = n - i - 2
+        if not skip and j >= 0:
+            new_title += bei[j]
+
+    return u'第' + new_title + u'章' + title[pos:]
+
+
+# 合并百度小说目录与正文
+def merge_baidu_novel():
+    f = open('toc', 'r')
+    toc = f.readlines()
+    f.close()
+
+    f = open('text', 'r')
+    text = f.read()
+    f.close
+
+    title = []
+    for t in toc:
+        t = string.strip(t)
+        if len(t) == 0:
+            break
+        mod = string.split(t, ',')
+        title.append([mod[0], int(mod[1])])
+
+    f = open('book.txt', 'w')
+
+    start = end = 0
+    for i in range(len(title)):
+        t = unicode(title[i][0], 'utf8', 'ignore')
+        t = num_to_chapter(t)
+        if t[0] != u'第':
+            t = u'※' + t
+        print t
+        f.write('\n' + t.encode('gbk', 'ignore') + '\n')
+
+        start = title[i][1]
+        if i == len(title) - 1:
+            t = text[start : ]
+        else:
+            end = title[i+1][1]
+            t = text[start : end]
+        t = unicode(t, 'utf8', 'ignore')
+        f.write(t.encode('gbk', 'ignore'))
+
+    f.close()
 
 
 ############################################################
