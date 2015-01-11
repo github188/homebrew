@@ -132,7 +132,7 @@ public class BatchTask {
 					}
 				}
 				
-				if (save && MainParam.getInstance().isForceGray())
+				if (save || MainParam.getInstance().isForceGray())
 					PicWorker.save(image, path + name);
 			}
 			
