@@ -7,6 +7,7 @@ import string
 # import Image
 import httplib
 import base64
+import urlparse
 
 from sgmllib import SGMLParser
 
@@ -649,6 +650,44 @@ def gen_pic_htm(fname, url):
         i += 1
     f.write('</body></html>\n')
     f.close()
+
+
+# 下载文件
+def download(host, url, referer, fname):
+    headers = {'Accept':'image/png,image/*;q=0.8,*/*;q=0.5',
+               'Accept-Encoding':'gzip, deflate',
+               'Accept-Language':'zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3',
+               'Connection':'keep-alive',
+               'Referer':referer,
+               'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:30.0) Gecko/20100101 Firefox/30.0'}
+
+    conn = httplib.HTTPConnection(host)
+    conn.request('GET', url, '', headers)
+    response = conn.getresponse()
+    if response.status == 200:
+        data = response.read();
+        f = open(fname, 'wb')
+        f.write(data)
+        f.close()
+        print url, '->', fname, len(data)
+    else:
+        print url, '->', fname, 'error'
+
+
+# http://www.imanhua.com 图片下载
+# url 图片地址
+# num 图片总量
+# referer http 引用地址
+def get_imanhua(url, num, referer):
+    pos = string.rfind(url, '_')
+    ext = string.rfind(url, '.')
+    uri = urlparse.urlparse(url)
+    for i in range(num):
+        link = '%s%03d%s' % (url[:pos+1], i+1, url[ext:])
+        name = link[string.rfind(link, '/') + 1 :]
+        if os.access(name, os.W_OK):
+            continue
+        download(uri.netloc, link, referer, name)
 
 
 # 从 http://hhcomic.com 下载漫画图片
