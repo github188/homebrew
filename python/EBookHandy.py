@@ -149,13 +149,14 @@ class mjdsParser(Html2TextParser):
 
     def handle_data(self, text):
         if self.start:
-            #print '[', text, ']'
+            # print '[', text, ']'
             if text == '><br':
                 return
             if text[:7] == 'http://':
                 return
             if text[0] == '>':
                 text = text[1:]
+            text = string.replace(text, '<br', '\n')
             if string.find(text, 'ps:') != 0:
                 Html2TextParser.handle_data(self, text)
 
