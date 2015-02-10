@@ -8,6 +8,7 @@ import string
 import httplib
 import base64
 import urlparse
+import urllib
 
 from sgmllib import SGMLParser
 
@@ -659,11 +660,15 @@ def download(host, url, referer, fname):
                'Accept-Language':'zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3',
                'Connection':'keep-alive',
                'Referer':referer,
-               'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:30.0) Gecko/20100101 Firefox/30.0'}
+               'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/600.1.25 (KHTML, like Gecko) Version/8.0 Safari/600.1.25'}
 
     conn = httplib.HTTPConnection(host)
     conn.request('GET', url, '', headers)
     response = conn.getresponse()
+    if response.status >= 300 and response.status < 400:
+        for h in response.getheaders():
+            if h[0] == 'location':
+                print h[0], h[1]
     if response.status == 200:
         data = response.read();
         f = open(fname, 'wb')
@@ -671,7 +676,7 @@ def download(host, url, referer, fname):
         f.close()
         print url, '->', fname, len(data)
     else:
-        print url, '->', fname, 'error'
+        print url, '->', fname, 'error', response.status
 
 
 # http://www.imanhua.com 图片下载
@@ -679,12 +684,18 @@ def download(host, url, referer, fname):
 # num 图片总量
 # referer http 引用地址
 def get_imanhua(url, num, referer):
-    pos = string.rfind(url, '_')
-    ext = string.rfind(url, '.')
     uri = urlparse.urlparse(url)
+    path = urllib.unquote(uri.path)
+    pos = string.rfind(path, '_')
+    if pos == -1:
+        pos = string.rfind(path, ' ')
+    ext = string.rfind(path, '.')
     for i in range(num):
-        link = '%s%03d%s' % (url[:pos+1], i+1, url[ext:])
+        link = '%s%03d%s' % (path[:pos+1], i+1, path[ext:])
         name = link[string.rfind(link, '/') + 1 :]
+        name = string.replace(name, ' ', '_')
+        link = uri.scheme + '://' + uri.netloc + urllib.quote(link)
+        # print link, name
         if os.access(name, os.W_OK):
             continue
         download(uri.netloc, link, referer, name)
